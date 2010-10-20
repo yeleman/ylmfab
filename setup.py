@@ -9,7 +9,8 @@ setup(
     version=__import__('ylmfab').__version__,
     license = 'GNU Lesser General Public License (LGPL), Version 3',
 
-    requires = ['python (>= 2.6)', 'django (>= 1.2)', 'Fabric (>=0.9.2)'],
+    install_requires = ['setuptools', 'Fabric']
+    requires = ['python (>= 2.6)', 'Fabric (>=0.9.2)'],
     provides = ['ylmfab'],
 
     description='fabfile helper.',
