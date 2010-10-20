@@ -2,14 +2,14 @@
 # encoding=utf-8
 # maintainer: rgaudin
 
-from distutils.core import setup
+import setuptools
 
-setup(
+setuptools.setup(
     name='ylmfab',
     version=__import__('ylmfab').__version__,
     license = 'GNU Lesser General Public License (LGPL), Version 3',
 
-    requires = ['python (>= 2.6)', 'Fabric (>=0.9.2)'],
+    install_requires = ['Fabric>=0.9.2'],
     provides = ['ylmfab'],
 
     description='fabfile helper.',
