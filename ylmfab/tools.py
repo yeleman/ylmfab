@@ -4,8 +4,6 @@
 
 import os
 
-from fabric.api import *
-
 from .constants import *
 from .raw_tools import *
 

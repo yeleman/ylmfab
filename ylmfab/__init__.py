@@ -14,5 +14,8 @@ __version__ = get_version()
 
 from .constants import *
 from .models import Dependency
-from .raw_tools import *
-from .tools import *
+try:
+    from .raw_tools import *
+    from .tools import *
+except ImportError:
+    pass
