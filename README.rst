@@ -11,9 +11,14 @@ and revisions.
 Installation
 ------------
 
+Recommended way
+~~~~~~~~~~~~~~~
+
+    pip install ylmfab
+
 From Github
 ~~~~~~~~~~~
-You can install ylmfab directly from github::
+You can install ylmfab directly from github:
 
     pip install -e git+git://github.com/yeleman/ylmfab.git#egg=ylmfab
 
