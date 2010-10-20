@@ -9,12 +9,15 @@ from fabric.api import local, cd
 
 from .constants import *
 
+
 def python_version():
     return  '.'.join(str(p) for p in sys.version_info[:2])
+
 
 def site_packages_path():
     return '%(prefix)s/lib/python%(version)s/site-packages' \
             % {'prefix': path_prefix(), 'version': python_version()}
+
 
 def path_prefix():
     if is_virtual():
@@ -22,14 +25,17 @@ def path_prefix():
     else:
         return '%s/local/' % sys.prefix
 
+
 def is_virtual():
-    return os.environ.has_key('VIRTUAL_ENV')
+    return 'VIRTUAL_ENV' in os.environ
+
 
 def absolute_path(path, at=DEFAULT_WD):
 
     with cd(at):
         root = local('pwd')
     return os.path.join(root, path)
+
 
 def git_clone(url, at=DEFAULT_WD, to=None):
 
@@ -47,6 +53,7 @@ def git_clone(url, at=DEFAULT_WD, to=None):
         local('git clone %(url)s%(path)s' % {'url': url, 'path': path}, \
                capture=False)
 
+
 def git_pull(at=DEFAULT_WD):
 
     """ pulls a git repository
@@ -59,10 +66,12 @@ def git_pull(at=DEFAULT_WD):
     with cd(at):
         local('git pull', capture=False)
 
+
 def switch_local_branch(branch, at=DEFAULT_WD):
 
     with cd(at):
         local('git checkout %(branch)s' % {'branch': branch}, capture=False)
+
 
 def switch_remote_branch(branch, local_branch=None, at=DEFAULT_WD):
 
@@ -74,16 +83,19 @@ def switch_remote_branch(branch, local_branch=None, at=DEFAULT_WD):
               % {'branch': branch, 'local_branch': local_branch}, \
               capture=False)
 
+
 def git_branch_exists(branch, at=DEFAULT_WD):
 
     with cd(at):
         return bool(local('git branch -a |grep %(branch)s | wc -l' \
                                   % {'branch': branch}))
 
+
 def git_get_revision(revision, at=DEFAULT_WD):
 
     with cd(at):
         local('git reset --hard %(rev)s' % {'rev': revision}, capture=False)
+
 
 def symlink_lib(lib_name=None, to=DEFAULT_WD, lib_path=None, destination=None):
 
@@ -105,6 +117,7 @@ def symlink_lib(lib_name=None, to=DEFAULT_WD, lib_path=None, destination=None):
         local('ln -fs %(dep_lib)s %(dep_name)s' % \
                {'dep_lib': dep_lib, 'dep_name': lib_name}, capture=False)
 
+
 def python_install(at):
 
     # sudo the install if not on virtualenv
@@ -113,6 +126,7 @@ def python_install(at):
     with cd(at):
         launcher('./setup.py install', capture=False)
 
+
 def pip_install_package(package):
 
     # sudo the install if not on virtualenv
@@ -120,12 +134,14 @@ def pip_install_package(package):
 
     launcher('pip install %(package)s' % {'package': package}, capture=False)
 
+
 def pip_install_url(url):
 
     # sudo the install if not on virtualenv
     launcher = local if is_virtual() else sudo
 
-    launcher('pip install -e %(url)s' % {'url': url}, capture=False)    
+    launcher('pip install -e %(url)s' % {'url': url}, capture=False)
+
 
 def pip_install_req(req_file):
 

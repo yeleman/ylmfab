@@ -31,7 +31,7 @@ def install(dep, working_dir=DEFAULT_WD):
             switch_branch(dep)
 
             # get revision
-            get_revision(dep)        
+            get_revision(dep)
 
             # install
             setup_install(dep)
@@ -42,15 +42,18 @@ def install(dep, working_dir=DEFAULT_WD):
             # install pip-req
             install_pip_req(dep)
 
+
 def clone(dep, working_dir=DEFAULT_WD):
 
     # git clone the repository
     git_clone(url=dep.url, at=working_dir, to=dep.clone_name)
 
+
 def update(dep, working_dir=DEFAULT_WD):
 
     # git pull the repository
     git_pull(at=working_dir)
+
 
 def switch_branch(dep, working_dir=DEFAULT_WD):
 
@@ -64,12 +67,14 @@ def switch_branch(dep, working_dir=DEFAULT_WD):
         else:
             switch_local_branch(branch=dep.branch, at=working_dir)
 
+
 def get_revision(dep, working_dir=DEFAULT_WD):
 
     if not dep.revision:
         return NOTHING_TO_DO
 
     git_get_revision(revision=dep.revision, at=working_dir)
+
 
 def create_symlink(dep, working_dir=DEFAULT_WD):
 
@@ -79,12 +84,14 @@ def create_symlink(dep, working_dir=DEFAULT_WD):
     # create lib symlink on site-packages
     symlink_lib(lib_name=dep.lib_name, to=working_dir, lib_path=dep.lib_path)
 
+
 def setup_install(dep, working_dir=DEFAULT_WD):
 
     if not dep.install:
         return NOTHING_TO_DO
 
     python_install(at=working_dir)
+
 
 def install_pip_req(dep, working_dir=DEFAULT_WD):
 

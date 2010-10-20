@@ -5,4 +5,3 @@
 DEFAULT_WD = '.'
 NOTHING_TO_DO = 10
 JOB_DONE = 20
-
