@@ -38,7 +38,7 @@ def absolute_path(path, at=DEFAULT_WD):
 
 
 def get_pwd():
-     with settings(
+    with settings(
         hide('warnings', 'running', 'stdout', 'stderr'), \
         warn_only=True):
         return local('pwd')
@@ -57,8 +57,8 @@ def git_clone(url, at=DEFAULT_WD, to=None):
 
     path = ' %s' % to if to else ''
     with cd(at):
-        local('git clone %(url)s%(path)s' % {'url': url, 'path': path}, \
-               capture=False)
+        return local('git clone %(url)s%(path)s' \
+                     % {'url': url, 'path': path}, capture=False)
 
 
 def git_pull(at=DEFAULT_WD):
@@ -105,6 +105,13 @@ def git_get_revision(revision, at=DEFAULT_WD):
 
     with cd(at):
         local('git reset --hard %(rev)s' % {'rev': revision}, capture=False)
+
+
+def git_change_config(name, value, at=DEFAULT_WD):
+
+    with cd(at):
+        local('git config %(name)s "%(value)s"' \
+              % {'name': name, 'value': value}, capture=False)
 
 
 def symlink_lib(lib_name=None, to=DEFAULT_WD, lib_path=None, destination=None):
@@ -162,6 +169,7 @@ def pip_install_req(req_file):
     launcher('pip install -r %(pip_file)s' \
              % {'pip_file': req_file}, capture=False)
 
+
 def deb_install_package(package):
 
     sudo('aptitude install %(package)s' % {'package': package}, capture=False)
@@ -178,12 +186,14 @@ def django_create_superuser(at=DEFAULT_WD, \
 
     cmd = './manage.py createsuperuser'
     if username:
-        cmd = '%(cmd)s --username="%(username)s"' % {'cmd': cmd, 'username': username}
+        cmd = '%(cmd)s --username="%(username)s"' \
+               % {'cmd': cmd, 'username': username}
     if email:
         cmd = '%(cmd)s --email="%(email)s"' % {'cmd': cmd, 'email': email}
 
     with cd(at):
         local(cmd, capture=False)
+
 
 def django_migrate(at=DEFAULT_WD):
 

@@ -126,7 +126,7 @@ class Dependency(object):
         return t.rsplit('.git')[0]
 
     def is_git(self):
-        return self.kind in (self.GIT_REPO)
+        return self.kind in (self.GIT_REPO,)
 
     def is_pip_package(self):
         return self.kind == self.PIP_PACKAGE
@@ -148,6 +148,12 @@ class Dependency(object):
         xpart = url.rpartition('/')[2].rpartition('.')
         index = 0 if xpart[0] else 2
         return xpart[index]
+
+    def github_public(self):
+        return self.source.replace('git@github.com:', 'git://github.com/')
+
+    def github_private(self):
+        return self.source.replace('git://github.com/', 'git@github.com:')
 
     def module_name(self):
         if self.is_package():

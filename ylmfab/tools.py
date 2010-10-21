@@ -6,11 +6,12 @@ import os
 
 from .constants import *
 from .raw_tools import *
+from fabric.colors import blue, red
 
 
 def install(dep, working_dir=DEFAULT_WD):
 
-    print('--------\nInstalling %s\n--------' % dep)
+    print('--------\n' + blue('Installing %s' % dep) + '\n--------')
     if dep.kind in (dep.PIP_URL, dep.PIP_PACKAGE):
         if dep.kind == dep.PIP_URL:
             pip_install_url(dep.source)
@@ -133,3 +134,21 @@ def install_pip_req(dep, working_dir=DEFAULT_WD):
 
     req_file = absolute_path(dep.pip_file, at=working_dir)
     pip_install_req(req_file)
+
+
+def github_to_private(dep, working_dir=DEFAULT_WD):
+
+    if not dep.is_git():
+        return NOTHING_TO_DO
+
+    import datetime
+
+    with settings(warn_only=True):
+        temp_clone = git_clone(url=dep.github_private(), at='/tmp', \
+                               to=datetime.datetime.now().strftime('rep_%s'))
+
+    if not temp_clone.failed:
+        with cd(dep.clone_name):
+            # git config to change remote origin url
+            git_change_config(name='remote.origin.url', \
+                          value=dep.github_private(), at=working_dir)
