@@ -10,11 +10,16 @@ from .raw_tools import *
 
 def install(dep, working_dir=DEFAULT_WD):
 
+    print('--------\nInstalling %s\n--------' % dep)
     if dep.kind in (dep.PIP_URL, dep.PIP_PACKAGE):
         if dep.kind == dep.PIP_URL:
-            pip_install_url(dep.url)
+            pip_install_url(dep.source)
         elif dep.kind == dep.PIP_PACKAGE:
-            pip_install_package(dep.url)
+            pip_install_package(dep.source)
+        return JOB_DONE
+
+    if dep.kind == dep.DEBIAN_PACKAGE:
+        deb_install_package(package=dep.source)
         return JOB_DONE
 
     with cd(working_dir):
@@ -46,7 +51,7 @@ def install(dep, working_dir=DEFAULT_WD):
 def clone(dep, working_dir=DEFAULT_WD):
 
     # git clone the repository
-    git_clone(url=dep.url, at=working_dir, to=dep.clone_name)
+    git_clone(url=dep.source, at=working_dir, to=dep.clone_name)
 
 
 def update(dep, working_dir=DEFAULT_WD):

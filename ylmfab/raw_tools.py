@@ -5,7 +5,7 @@
 import sys
 import os
 
-from fabric.api import local, cd
+from fabric.api import local, cd, settings, hide
 
 from .constants import *
 
@@ -33,8 +33,15 @@ def is_virtual():
 def absolute_path(path, at=DEFAULT_WD):
 
     with cd(at):
-        root = local('pwd')
+        root = get_pwd()
     return os.path.join(root, path)
+
+
+def get_pwd():
+     with settings(
+        hide('warnings', 'running', 'stdout', 'stderr'), \
+        warn_only=True):
+        return local('pwd')
 
 
 def git_clone(url, at=DEFAULT_WD, to=None):
@@ -87,8 +94,11 @@ def switch_remote_branch(branch, local_branch=None, at=DEFAULT_WD):
 def git_branch_exists(branch, at=DEFAULT_WD):
 
     with cd(at):
-        return bool(local('git branch -a |grep %(branch)s | wc -l' \
-                                  % {'branch': branch}))
+        with settings(
+            hide('warnings', 'running', 'stdout', 'stderr'), \
+            warn_only=True):
+            return bool(local('git branch -a |grep %(branch)s | wc -l' \
+                              % {'branch': branch}))
 
 
 def git_get_revision(revision, at=DEFAULT_WD):
@@ -100,7 +110,7 @@ def git_get_revision(revision, at=DEFAULT_WD):
 def symlink_lib(lib_name=None, to=DEFAULT_WD, lib_path=None, destination=None):
 
     with cd(to):
-        dep_dir = local('pwd')
+        dep_dir = get_pwd()
 
     if not destination:
         destination = site_packages_path()
@@ -113,9 +123,10 @@ def symlink_lib(lib_name=None, to=DEFAULT_WD, lib_path=None, destination=None):
     if not lib_name:
         lib_name = '.'
 
-    with cd(destination):
-        local('ln -fs %(dep_lib)s %(dep_name)s' % \
-               {'dep_lib': dep_lib, 'dep_name': lib_name}, capture=False)
+    lib_name = absolute_path(path=lib_name, at=destination)
+    #with cd(destination):
+    local('ln -fs %(dep_lib)s %(dep_name)s' % \
+          {'dep_lib': dep_lib, 'dep_name': lib_name}, capture=False)
 
 
 def python_install(at):
@@ -150,3 +161,7 @@ def pip_install_req(req_file):
 
     launcher('pip install -r %(pip_file)s' \
              % {'pip_file': req_file}, capture=False)
+
+def deb_install_package(package):
+
+    sudo('aptitude install %(package)s' % {'package': package}, capture=False)

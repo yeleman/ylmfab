@@ -8,16 +8,18 @@ class Dependency(object):
     GIT_REPO = 0
     PIP_PACKAGE = 1
     PIP_URL = 2
+    DEBIAN_PACKAGE = 3
     KINDS = ((GIT_REPO, 'Git repository'),
              (PIP_PACKAGE, 'PIP package'),
-             (PIP_URL, 'PIP URL'))
+             (PIP_URL, 'PIP URL'),
+             (DEBIAN_PACKAGE, 'Debian package'))
 
-    def __init__(self, url=None, branch=None, revision=None, \
+    def __init__(self, source=None, branch=None, revision=None, \
                  lib_path=None, lib_name=None, pip_file=None, \
                  clone_name=None, run_tests=False, symlink=True, \
                  install=False, kind=GIT_REPO, *args, **kwargs):
 
-        self.url = url
+        self.source = source
         self.branch = branch
         self.revision = revision
         self.lib_path = lib_path
@@ -29,13 +31,13 @@ class Dependency(object):
         self.install = install
         self.kind = kind
 
-    # url
-    def set_url(self, value):
-        self._url = value
+    # source/url
+    def set_source(self, value):
+        self._source = value
 
-    def get_url(self):
-        return self._url
-    url = property(get_url, set_url)
+    def get_source(self):
+        return unicode(self._source)
+    source = property(get_source, set_source)
 
     # branch
     def set_branch(self, value):
@@ -120,8 +122,40 @@ class Dependency(object):
     kind = property(get_kind, set_kind)
 
     def _get_name_from_git(self):
-        h, s, t = self.url.rpartition('/')
+        h, s, t = self.source.rpartition('/')
         return t.rstrip('.git')
 
+    def is_git(self):
+        return self.kind in (self.GIT_REPO)
+
+    def is_pip_package(self):
+        return self.kind == self.PIP_PACKAGE
+
+    def is_pip_url(self):
+        return self.kind == self.PIP_URL
+
+    def is_pip(self):
+        return self.kind in (self.PIP_PACKAGE, self.PIP_URL)
+
+    def is_deb(self):
+        return self.kind == self.DEBIAN_PACKAGE
+
+    def is_package(self):
+        return self.kind in (self.PIP_PACKAGE, self.DEBIAN_PACKAGE)
+
+    @classmethod
+    def canonical_name_from(cls, url=''):
+        xpart = url.rpartition('/')[2].rpartition('.')
+        index = 0 if xpart[0] else 2
+        return xpart[index]
+
+    def module_name(self):
+        if self.is_package():
+            return self.source
+        if self.lib_name:
+            return self.lib_name
+        return Dependency.canonical_name_from(url=self.source)
+
     def __str__(self):
-        return u"%(name)s" % {'name': self.lib_name}
+
+        return u"<%(name)s>" % {'name': self.module_name()}
