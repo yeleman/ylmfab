@@ -124,7 +124,7 @@ def symlink_lib(lib_name=None, to=DEFAULT_WD, lib_path=None, destination=None):
         lib_name = '.'
 
     lib_name = absolute_path(path=lib_name, at=destination)
-    #with cd(destination):
+
     local('ln -fs %(dep_lib)s %(dep_name)s' % \
           {'dep_lib': dep_lib, 'dep_name': lib_name}, capture=False)
 
@@ -165,3 +165,34 @@ def pip_install_req(req_file):
 def deb_install_package(package):
 
     sudo('aptitude install %(package)s' % {'package': package}, capture=False)
+
+
+def django_syncdb(at=DEFAULT_WD):
+
+    with cd(at):
+        local('./manage.py syncdb --noinput', capture=False)
+
+
+def django_create_superuser(at=DEFAULT_WD, \
+                       username=None, password=None, email=None, **args):
+
+    cmd = './manage.py createsuperuser'
+    if username:
+        cmd = '%(cmd)s --username="%(username)s"' % {'cmd': cmd, 'username': username}
+    if email:
+        cmd = '%(cmd)s --email="%(email)s"' % {'cmd': cmd, 'email': email}
+
+    with cd(at):
+        local(cmd, capture=False)
+
+def django_migrate(at=DEFAULT_WD):
+
+    with cd(at):
+        local('./manage.py migrate', capture=False)
+
+
+def django_loaddata(at=DEFAULT_WD, fixtures='initial_import.json'):
+
+    with cd(at):
+        local('./manage.py loaddata %(fixtures)s' % {'fixtures': fixtures}, \
+              capture=False)

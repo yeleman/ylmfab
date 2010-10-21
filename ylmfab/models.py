@@ -123,7 +123,7 @@ class Dependency(object):
 
     def _get_name_from_git(self):
         h, s, t = self.source.rpartition('/')
-        return t.rstrip('.git')
+        return t.rsplit('.git')[0]
 
     def is_git(self):
         return self.kind in (self.GIT_REPO)

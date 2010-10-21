@@ -48,6 +48,34 @@ def install(dep, working_dir=DEFAULT_WD):
             install_pip_req(dep)
 
 
+def syncdb_only(rep, working_dir=DEFAULT_WD):
+
+    # ./manage.py syncdb --noinput
+    django_syncdb(at=working_dir)
+
+
+def syncdb(rep, working_dir=DEFAULT_WD, \
+           username=None, password=None, email=None):
+
+    # ./manage.py syncdb --noinput
+    django_syncdb(at=working_dir)
+    # ./manage.py createsuperuser
+    django_create_superuser(at=working_dir, \
+                       username=username, password=password, email=email)
+
+
+def migrate(rep, working_dir=DEFAULT_WD):
+
+    # ./manage migrate (for South)
+    django_migrate(at=working_dir)
+
+
+def loadfixtures(rep, fixtures='initial_data.json', working_dir=DEFAULT_WD):
+
+    # ./manage.py loaddata
+    django_loaddata(at=working_dir, fixtures=fixtures)
+
+
 def clone(dep, working_dir=DEFAULT_WD):
 
     # git clone the repository
