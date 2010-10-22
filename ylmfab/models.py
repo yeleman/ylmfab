@@ -2,22 +2,29 @@
 # encoding=utf-8
 # maintainer: rgaudin
 
+import weakref
+
 
 class Dependency(object):
 
-    GIT_REPO = 0
+    __instances__ = []
+
+    DEBIAN_PACKAGE = 0
     PIP_PACKAGE = 1
     PIP_URL = 2
-    DEBIAN_PACKAGE = 3
-    KINDS = ((GIT_REPO, 'Git repository'),
-             (PIP_PACKAGE, 'PIP package'),
-             (PIP_URL, 'PIP URL'),
-             (DEBIAN_PACKAGE, 'Debian package'))
+    GIT_REPO = 3
+    KINDS = ((DEBIAN_PACKAGE, 'Debian package(s)'),
+             (PIP_PACKAGE, 'PIP package(s)'),
+             (PIP_URL, 'PIP URL(s)'),
+             (GIT_REPO, 'Git repositor(y|ies)'))
 
     def __init__(self, source=None, branch=None, revision=None, \
                  lib_path=None, lib_name=None, pip_file=None, \
                  clone_name=None, run_tests=False, symlink=True, \
                  install=False, kind=GIT_REPO, *args, **kwargs):
+
+        # keep track of instances
+        self.__instances__.append(weakref.ref(self))
 
         self.source = source
         self.branch = branch
@@ -155,6 +162,7 @@ class Dependency(object):
     def github_private(self):
         return self.source.replace('git://github.com/', 'git@github.com:')
 
+    @property
     def module_name(self):
         if self.is_package():
             return self.source
@@ -162,6 +170,74 @@ class Dependency(object):
             return self.lib_name
         return Dependency.canonical_name_from(url=self.source)
 
+    @classmethod
+    def instances(cls):
+        return [inst.__call__() for inst in cls.__instances__]
+
+    @classmethod
+    def all_by_kind(cls, kind):
+        results = []
+        for inst in cls.instances():
+            if inst.kind == kind:
+                results.append(inst)
+        return results
+
     def __str__(self):
 
         return u"<%(name)s>" % {'name': self.module_name()}
+
+    def __rst__(self):
+        if self.is_deb():
+            return u"**%(name)s**\n\n" \
+                    "    ``sudo aptitude install %(name)s``" \
+                   % {'name': self.module_name}
+        if self.is_pip_package():
+            return u"**%(name)s**\n\n" \
+                    "    ``pip install %(name)s``" \
+                   % {'name': self.module_name}
+        if self.is_pip_url():
+            return u"**%(name)s**\n\n" \
+                    "    ``pip install -e %(source)s``" \
+                   % {'name': self.module_name, 'source': self.source}
+        if self.is_git():
+            rst = u"**%(name)s**\n\n" \
+                    "    ``git clone %(source)s``" \
+                   % {'name': self.module_name, 'source': self.source}
+            if self.branch:
+                rst += u"\n    ``git checkout %(branch)s``" \
+                       % {'branch': self.branch}
+            if self.revision:
+                rst += u"\n    ``git reset --hard %(revision)s``" \
+                       % {'revision': self.revision}
+            return rst
+
+    @classmethod
+    def kind_name(cls, kind):
+        for kind_id, kind_name in cls.KINDS:
+            if kind == kind_id:
+                return kind_name
+        return None
+
+    @classmethod
+    def kind_rst(cls, kind):
+        kind_name = cls.kind_name(kind)
+        line = u"".zfill(kind_name.__len__()).replace('0', '~')
+        return u"%(name)s\n%(line)s" % {'name': kind_name, 'line': line}
+
+    @classmethod
+    def __rst_all__(cls):
+
+        rst = u""
+        # store dependencies in a hash indexed by type
+        deps = {}
+        for kind, kind_name in Dependency.KINDS:
+            deps[kind] = Dependency.all_by_kind(kind)
+
+        for kind, kind_deps in deps.items():
+            if kind_deps:
+                deps_rst = u"- " + u"\n\n- ".join([k.__rst__() \
+                                                for k in kind_deps])
+                rst += "%(kind)s\n\n%(deps)s\n\n" \
+                       % {'kind': cls.kind_rst(kind), \
+                          'deps': deps_rst}
+        return rst

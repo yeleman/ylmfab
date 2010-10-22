@@ -206,3 +206,10 @@ def django_loaddata(at=DEFAULT_WD, fixtures='initial_import.json'):
     with cd(at):
         local('./manage.py loaddata %(fixtures)s' % {'fixtures': fixtures}, \
               capture=False)
+
+
+def dependencies_to_rst(dependencies):
+
+    from .models import Dependency
+
+    return Dependency.__rst_all__()
